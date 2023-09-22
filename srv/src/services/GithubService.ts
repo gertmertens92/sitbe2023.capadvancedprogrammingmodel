@@ -13,8 +13,10 @@ export default class GithubService extends BaseService {
     }
     
     public submitIssue(title: string, message: string): Promise<any> {
+        require('dotenv').config() 
+
         const octokit = new Octokit({
-            auth: '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'
+            auth: process.env.ACCESS_TOKEN
         })
 
         return octokit.request(`POST /repos/${this.owner}/${this.repo}/${this.entityName}`, {
