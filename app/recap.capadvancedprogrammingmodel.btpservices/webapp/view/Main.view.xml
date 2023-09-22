@@ -17,6 +17,7 @@
 				<t:extension>
 					<OverflowToolbar>
 						<ToolbarSpacer />
+						<Button text="Submit issue" press=".onSubmitIssue" />
 						<Button icon="sap-icon://excel-attachment" press=".onExport"/>
 						<Button icon="sap-icon://filter" press=".onFilterTableServices" >
 							<layoutData>

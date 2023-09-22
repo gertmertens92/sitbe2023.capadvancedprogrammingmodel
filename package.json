@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@octokit/core": "^5.0.0",
     "@sap-cloud-sdk/http-client": "^2.14.0",
     "@sap/cds": "^6",
     "@sap/xsenv": "^3.4.0",
@@ -55,6 +56,13 @@
         "credentials": {
           "url": "https://discovery-center.cloud.sap",
           "path": "/servicecatalog"
+        }
+      },
+      "github_api": {
+        "kind": "odata-v2",
+        "credentials": {
+          "url": "https://api.github.com",
+          "path": "/repos"
         }
       },
       "db": {

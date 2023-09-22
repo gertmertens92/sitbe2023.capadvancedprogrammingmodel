@@ -32,6 +32,7 @@ export default class BTPServiceService extends Object{
         super();
         this.model = model;
     }
+
     public async getBTPServices(): Promise<EntitySet<ServicesEntity>> {
         const templateBinding = this.model.bindContext(`/Services`);
         return await templateBinding.requestObject() as EntitySet<ServicesEntity>;

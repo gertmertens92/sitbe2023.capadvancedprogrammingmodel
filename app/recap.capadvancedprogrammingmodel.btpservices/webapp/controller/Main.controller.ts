@@ -1,6 +1,6 @@
 import BaseController from "./BaseController";
 import formatter from "../model/formatter";
-import BTPServiceState, { BTPServiceData, column } from "../state/BTPServiceState";
+import BTPServiceState, { BTPServiceData, column } from "../state/GitServiceState";
 import Context from "sap/ui/model/Context";
 import Text from "sap/m/Text";
 import Column from "sap/ui/table/Column";
@@ -17,6 +17,14 @@ import VerticalLayout from "sap/ui/layout/VerticalLayout";
 import InfoLabel from "sap/tnt/InfoLabel";
 import Fragment from "sap/ui/core/Fragment";
 import BusyDialog from "sap/m/BusyDialog";
+import Dialog from "sap/m/Dialog";
+import Button from "sap/m/Button";
+import Library from "sap/m/library";
+import Label from "sap/m/Label";
+import TextArea from "sap/m/TextArea";
+import Input from "sap/m/Input";
+import Core from "sap/ui/core/Core";
+import GitServiceState from "../state/GitServiceState";
 
 /**
  * @namespace recap.capadvancedprogrammingmodel.btpservices.controller
@@ -25,12 +33,15 @@ export default class Main extends BaseController {
 	private formatter = formatter;
 	protected btpServiceState: BTPServiceState;
 	protected btpServiceStateData: BTPServiceData;
+	protected gitServiceState: GitServiceState;
 	private tablePersoController: TablePersoController;
 	private busyDialog: BusyDialog;
+	private submitDialog: Dialog;
 
 	public async onInit(): Promise<void> {
 		this.btpServiceState = this.getOwnerComponent().getModel("btp") as BTPServiceState;
 		this.btpServiceStateData = this.btpServiceState.getData() as BTPServiceData;
+		this.gitServiceState = this.getOwnerComponent().getModel("git") as GitServiceState;
 		this.tablePersoController = new TablePersoController({
 			table: this.byId("genericTable") as Table,
 			persoService: ServicesPersoService,
@@ -67,6 +78,7 @@ export default class Main extends BaseController {
 			template: column.id === "Name" ? new Text({ text: `{btp>${column.id}}` }) : list
 		});
 	}
+
 	public onExport() {
 		const table = this.byId('genericTable') as Table;
 		const rowBinding = table.getBinding('rows');
@@ -109,6 +121,55 @@ export default class Main extends BaseController {
 				and: false
 			}))
 		}
+	}
+
+	public async onSubmitIssue(){
+		if (!this.submitDialog) {
+			this.submitDialog = new Dialog({
+				type: Library.DialogType.Message,
+				title: "Issue",
+				content: [
+					new Label({
+						text: "Title",
+						labelFor: "issueTitle"
+					}),
+					new Input("issueTitle", {
+						width: "100%",
+						placeholder: "Add title"
+					}),
+					new Label({
+						text: "Issue",
+						labelFor: "issueMessage"
+					}),
+					new TextArea("issueMessage", {
+						width: "100%",
+						placeholder: "Add message"
+					})
+				],
+				beginButton: new Button({
+					type: Library.ButtonType.Emphasized,
+					text: "Submit",
+					press: async () => {
+						const title = Core.byId("issueTitle").getValue();
+						const issue = Core.byId("issueMessage").getValue();
+						const result = await this.gitServiceState.submitIssue(title, issue);
+						MessageToast.show(result);
+						this.submitDialog.close();
+					}
+				}),
+				endButton: new Button({
+					text: "Cancel",
+					press: () => {
+						this.submitDialog.close();
+					}
+				})
+			});
+		}
+
+		Core.byId("issueTitle").setValue("");
+		Core.byId("issueMessage").setValue("");
+
+		this.submitDialog.open();
 	}
 
 }

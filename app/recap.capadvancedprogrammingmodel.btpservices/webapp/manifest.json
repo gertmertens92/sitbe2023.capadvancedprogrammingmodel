@@ -17,6 +17,14 @@
                     "odataVersion": "4.0",
                     "localUri": "localService/metadata.xml"
                 }
+            },
+			"GitService": {
+                "uri": "/git/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0",
+                    "localUri": "localService/metadata.xml"
+                }
             }
 		}
 	},
@@ -71,6 +79,10 @@
 			"btp": {
 				"dataSource": "BTPService",
 				"type": "recap.capadvancedprogrammingmodel.btpservices.state.BTPServiceState"
+			},
+			"git": {
+				"dataSource": "GitService",
+				"type": "recap.capadvancedprogrammingmodel.btpservices.state.GitServiceState"
 			}
 		},
 		"routing": {

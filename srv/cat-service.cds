@@ -1,4 +1,4 @@
-@impl: './src/cat-service'
+@impl: './src/service'
 service CatalogService {
     @readonly  @cds.persistence.skip
     entity Services {

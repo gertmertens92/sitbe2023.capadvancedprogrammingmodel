@@ -43,7 +43,7 @@ export default class EntityFactory {
             if(!imp.default) continue;
 
             if (folderName === operationsDir) {
-                const serviceName = path.parse(file).dir.split("/").splice(-2)[0];
+                const serviceName = path.parse(file).dir.split("\\").splice(-2)[0];
 
                 let entityName;
                 const split = fileName.split(".");
