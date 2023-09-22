@@ -1,0 +1,2 @@
+"use strict";sap.ui.define(["sap/ui/core/Fragment","./BaseController"],function(e,t){"use strict";function r(e){return e&&e.__esModule&&typeof e.default!=="undefined"?e.default:e}const n=r(t);const a=n.extend("recap.capadvancedprogrammingmodel.btpservices.controller.Dialog",{fragmentById:function t(r,n,a){return sap.ui.getCore().byId(r.createId(e.createId(n,a)))}});return a});
+//# sourceMappingURL=DialogController.js.map
