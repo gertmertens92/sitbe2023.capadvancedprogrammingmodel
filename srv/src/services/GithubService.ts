@@ -14,7 +14,7 @@ export default class GithubService extends BaseService {
     
     public submitIssue(title: string, message: string): Promise<any> {
         const octokit = new Octokit({
-            auth: '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'
+            auth: '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'
         })
 
         return octokit.request(`POST /repos/${this.owner}/${this.repo}/${this.entityName}`, {
