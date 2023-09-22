@@ -1,0 +1,123 @@
+{
+  // Place your ReCAPBTPServiceOverview-main workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+  // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+  // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+  // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+  // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+  // Placeholders with the same ids are connected.
+  // Example:
+  // "Print to console": {
+  // 	"scope": "javascript,typescript",
+  // 	"prefix": "log",
+  // 	"body": [
+  // 		"console.log('$1');",
+  // 		"$2"
+  // 	],
+  // 	"description": "Log output to console"
+  // }
+
+  "1 - serviceshandler": {
+    "scope": "javascript,typescript",
+    "prefix": "serviceshandler-constructor",
+    "body": ["private discoveryCenterService!: DiscoveryCenterService;",
+    "private cachedDiscoveryCenters: IDiscoveryCenterList;",
+	"",
+    "constructor() {",
+    "    super([",
+    "        { event: 'on', type: 'READ' }",
+    "    ]);",
+    "    this.cachedDiscoveryCenters = [];",
+    "}"]
+  },
+  "2 - serviceshandler": {
+    "scope": "javascript,typescript",
+    "prefix": "serviceshandler-onRead",
+    "body": ["protected async onRead(req: any,next:any,skip:number,top:number) {",
+        "let discoveryCenterResult: IDiscoveryCenterList = [];",
+        "if (this.cachedDiscoveryCenters.length > 0) {",
+        "    discoveryCenterResult = [...this.cachedDiscoveryCenters];",
+        "}",
+		"",
+        "if (discoveryCenterResult.length < 1) {",
+        "    cds.spawn({ every: 3600000 }, async (tx) => {",
+        "        discoveryCenterResult = await this.getBTPServices();",
+        "    })",
+        "    if (this.cachedDiscoveryCenters.length === 0) {",
+        "        discoveryCenterResult = await this.getBTPServices();",
+        "    }",
+        "}",
+		"",
+        "const total = discoveryCenterResult.length;",
+        "if(top<total)discoveryCenterResult.splice(skip, top);",
+        "if (req.query.SELECT.count) discoveryCenterResult['\\$count'] = total;",
+        "return discoveryCenterResult;",
+		"}"]
+  },
+  "3 - serviceshandler": {
+    "scope": "javascript,typescript",
+    "prefix": "serviceshandler-getBTPServices",
+    "body": ["private async getBTPServices(): Promise<IDiscoveryCenterList> {",
+		"this.discoveryCenterService = await this.getService(DiscoveryCenterService);",
+        "let discoveryCenterResult: IDiscoveryCenterList = [];",
+        "let discoveryCenter = await this.discoveryCenterService.getServices();",
+        "const serviceDetailsResult = await this.discoveryCenterService.getAllServiceDetails(discoveryCenter);",
+		"",
+        "for (const service of discoveryCenter) {",
+        "    const serviceDetail = serviceDetailsResult.find(serviceDetail => serviceDetail.Id === service.Id);",
+        "    if (serviceDetail) {",
+        "        for (const servicePlan of serviceDetail.servicePlans) {",
+        "            for (const env of servicePlan.environments) {",
+        "                discoveryCenterResult.push({ ...service, ServicePlan: servicePlan.Code, ServicePlanName: servicePlan.Name, Infrastructure: env.Infrastructure, Platform: env.Platform, Region: env.Region });",
+        "            }",
+        "        }",
+        "    }",
+        "}",
+        "this.cachedDiscoveryCenters = [...discoveryCenterResult];",
+        "return discoveryCenterResult;",
+		"}"]
+  },
+  "1 - discoverycenterservice": {
+    "scope": "javascript,typescript",
+    "prefix": "discoverycenterservice-constructor",
+    "body": ["private readonly entityName: string = 'Services';",
+	"private readonly entityNameDetails: string = 'GetServicesDetails';",
+	"",
+	"constructor() {",
+	"	super('DISCOVERY_CENTER_API');",
+	"}"]
+  },
+  "2 - discoverycenterservice": {
+    "scope": "javascript,typescript",
+    "prefix": "discoverycenterservice-getservices",
+    "body": ["public async getServices(): Promise<Array<IDiscoveryCenterEntity>> {",
+	"	return (await this.cdsService.get(`/\\${this.entityName}`) as unknown as Array<IDiscoveryCenterEntity>);",
+	"}"]
+  },
+  "3 - discoverycenterservice": {
+    "scope": "javascript,typescript",
+    "prefix": "discoverycenterservice-getServiceDetails",
+    "body": ["public async getServiceDetails(id: string): Promise<IDiscoveryCenterServiceEntity> {",
+	"	const serviceDetails = (await this.cdsService.get(`/\\${this.entityNameDetails}?serviceId='\\${id}'`) as unknown as { GetServicesDetails: string });",
+	"	return JSON.parse(serviceDetails.GetServicesDetails) as IDiscoveryCenterServiceEntity;",
+	"}"]
+  },
+  "4 - discoverycenterservice": {
+    "scope": "javascript,typescript",
+    "prefix": "discoverycenterservice-getAllServiceDetails",
+    "body": ["public async getAllServiceDetails(services: Array<IDiscoveryCenterEntity>) {",
+	"	const chunkSize = 20;",
+	"	let serviceDetailsResult: IDiscoveryCenterServiceEntity[] = [];",
+	"	for (let i = 0; i < services.length; i += chunkSize) {",
+	"		if (i > 0) await new Promise(resolve => setTimeout(resolve, 1000));",
+	"		const chunkServices = services.slice(i, i + chunkSize);",
+	"		let serviceDetailsPromises: Promise<IDiscoveryCenterServiceEntity>[] = [];",
+	"		for (const service of chunkServices) {",
+	"			serviceDetailsPromises.push(this.getServiceDetails(service.Id));",
+	"		}",
+	"		const responses = await Promise.all(serviceDetailsPromises);",
+	"		serviceDetailsResult = [...serviceDetailsResult, ...responses];",
+	"	}",
+	"	return serviceDetailsResult;",
+	"}"]
+  }
+}
